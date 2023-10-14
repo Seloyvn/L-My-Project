@@ -14,6 +14,7 @@ public class MapBuilder : MonoBehaviour
     public Terrain terrain;
     private void Start()
     {
+        Debug.Log(Application.persistentDataPath + "/map.map");
         Load();
     }
     void Update()

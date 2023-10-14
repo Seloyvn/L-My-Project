@@ -23,7 +23,7 @@ public class Herbert : Champion
     public override void hoverField()
     {
         Field f = gamemanager.getCurrentField();
-        if (f == null)
+        if (f == null||!isOwned)
         {
             gamemanager.Hover(null, HoverMode.None);
             return;

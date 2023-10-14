@@ -4,5 +4,12 @@ using UnityEngine;
 
 public class Minion : Unit
 {
+    public override void GetTurn()
+    {
+        base.GetTurn();
+    }
+    public void setPath((int, int)[] t)
+    {
 
+    }
 }

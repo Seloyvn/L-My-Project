@@ -11,6 +11,7 @@ public class GameManager : NetworkBehaviour
     public Field[,] fields;
     public List<Field> allFields = new List<Field>();
     public GameObject[] AllChampionPrefabs;
+    public GameObject MinionPrefab;
     [HideInInspector]
     public Entity CurrentTurn;
 
@@ -80,6 +81,7 @@ public class GameManager : NetworkBehaviour
                 getField((i < 5 ? 4 : 123, i < 5 ? 4 : 123)),2).coordinates,
                 NetworkServer.connections[i < 5 ? 0 : NetworkServer.connections.Last().Key].identity.GetComponent<Player>(), i < 5 ? 0 : 1);
         }
+        SpawnMinions();
 
         setCurrentTurn(nextunit);
     }
@@ -104,6 +106,25 @@ public class GameManager : NetworkBehaviour
         getField(cord).unit=unit;
 
         unit.setfield(cord.Item1, cord.Item2);
+
+        nextunit = unit;
+    }
+    public void SpawnMinions()
+    {
+        SpawnMinion(3, 12,0,new (int, int)[3] {(3,12),(7,120),(124,115)});
+        //7 120
+    }
+    void SpawnMinion(int x,int y, int team,(int,int)[] t)
+    {
+        GameObject g = Instantiate(MinionPrefab);
+        NetworkServer.Spawn(g);
+        Minion unit = g.GetComponent<Minion>();
+        unit.Initative = 0;
+        unit.SetInitative();
+
+        unit.setTeam(team);
+
+        unit.setfield(x,y);
 
         nextunit = unit;
     }
