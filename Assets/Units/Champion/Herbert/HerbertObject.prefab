@@ -1716,8 +1716,8 @@ MonoBehaviour:
   Damage: 6
   Armor: 8
   MagicResistance: 7
-  MoveSpeed: 15
-  AttackSpeed: 2.5
+  MoveSpeed: 10
+  AttackSpeed: 1.5
   ControllUi: {fileID: 810104358360445479}
   Healthbar: {fileID: 2311956658352987997}
   SelectedAction: 0

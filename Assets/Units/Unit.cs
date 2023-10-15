@@ -28,10 +28,10 @@ public abstract class Unit : Entity
 
     [SyncVar]
     public float MoveSpeed;
-    public int MoveCost => (int)(100 / MoveSpeed)+1;
+    public int MoveCost => (int)(50 / MoveSpeed)+1;
     [SyncVar]
     public float AttackSpeed;
-    public int AttackCost => (int)(100 / AttackSpeed) + 1;
+    public int AttackCost => (int)(50 / AttackSpeed) + 1;
     #endregion
 
     GameManager gamemanager => GameManager.instance;
@@ -45,11 +45,21 @@ public abstract class Unit : Entity
         team = i == 0 ? gamemanager.team1 : gamemanager.team2;
         InitativeIcon.GetComponent<Image>().color = team.color;
     }
-    
-
-    [ClientRpc]
     public void setfield(int x,int y)
     {
+        if(field!=null)
+            field.unit = null;
+        field = gamemanager.getField((x, y));
+        field.unit = this;
+
+        transform.position = new Vector3(x + 0.5f, 0, y + 0.5f);
+        Rpcsetfield(x, y);
+    }
+    [ClientRpc]
+    public void Rpcsetfield(int x,int y)
+    {
+        if (isServer)
+            return;
         if(field!=null)
             field.unit = null;
         field = gamemanager.getField((x, y));
@@ -70,38 +80,41 @@ public abstract class Unit : Entity
         selectedunit = null;
         Ui.SetActive(false);
     }
-    public virtual void tryMove(Field field)
-    {
-        CmdtryMove((int)field.coordinates.Item1, (int)field.coordinates.Item2);
-    }
     [Command]
-    public virtual void CmdtryMove(int x,int y)
+    public virtual void CmdMove(int x,int y)
+    {
+        Field f = gamemanager.getField((x, y));
+        tryMove(f);
+    }
+    [Server]
+    public virtual bool tryMove(Field f)
     {
         if (gamemanager.CurrentTurn != this)
-            return;
-        Field f = gamemanager.getField((x, y));
-        if (f.unit == null&&f.fieldType==FieldType.Ground&&GameManager.Dist(f,field) <= 1000)
+            return false;
+        if (f.unit == null && f.fieldType == FieldType.Ground && GameManager.Dist(f, field) == 1)
         {
-            if (Initative <= MaxInitative-MoveCost)
+            if (Initative <= MaxInitative - MoveCost)
             {
-                setfield(x, y);
+                setfield(f.coordinates.Item1, f.coordinates.Item2);
                 IncreaseInitative(MoveCost);
                 gamemanager.ShowCurrentInitative(Initative, MaxInitative);
                 SetInitative();
+                return true;
             }
         }
-    }
-    public virtual void tryAttack(Field field)
-    {
-        CmdtryAttack((int)field.coordinates.Item1, (int)field.coordinates.Item2);
+        return false;
     }
     [Command]
     public virtual void CmdtryAttack(int x, int y)
     {
+        tryAttack(gamemanager.getField((x, y)));
+    }
+    [Server]
+    public virtual bool tryAttack(Field f)
+    {
         if (gamemanager.CurrentTurn != this)
-            return;
-        Field f = gamemanager.getField((x, y));
-        if (f.unit != null && f.unit.team!=team && GameManager.Dist(f, field) <= 1)
+            return false;
+        if (f.unit != null && f.unit.team != team && GameManager.Dist(f, field) <= 1)
         {
             if (Initative <= MaxInitative - AttackCost)
             {
@@ -109,8 +122,10 @@ public abstract class Unit : Entity
                 IncreaseInitative(AttackCost);
                 gamemanager.ShowCurrentInitative(Initative, MaxInitative);
                 SetInitative();
+                return true;
             }
         }
+        return false;
     }
     [ClientRpc]
     public override void RpcGetTurn()

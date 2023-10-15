@@ -6,6 +6,7 @@ public class Team
 {
     public Color color;
     public (int, int) spawnPoint;
+    public Player player;
     public Team(int id)
     {
         color = id == 1 ? Color.blue : Color.red;

@@ -58,10 +58,11 @@ public class Herbert : Champion
         switch (SelectedAction)
         {
             case 0:
-                tryMove(field);
+                CmdMove(field.coordinates.Item1, field.coordinates.Item2);
                 return;
             case 1:
-                tryAttack(field);
+
+                CmdtryAttack(field.coordinates.Item1, field.coordinates.Item2);
                 return;
             case 2:
                 tryAbility0(field);

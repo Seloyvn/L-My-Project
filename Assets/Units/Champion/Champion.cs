@@ -12,6 +12,7 @@ public abstract class Champion : Unit
     public int SelectedAction = 0;
 
     GameManager gamemanager => GameManager.instance;
+    public int MoveDist => (MaxInitative- Initative) / MoveCost;
     public override void Select()
     {
         base.Select();
@@ -33,7 +34,7 @@ public abstract class Champion : Unit
         switch (SelectedAction)
         {
             case 0:
-                if (GameManager.Dist(f, field) <= 1 && f.unit == null && f.fieldType == FieldType.Ground && Initative + MoveCost <= MaxInitative)
+                if (GameManager.Dist(f, field) <= MoveDist && f.unit == null && f.fieldType == FieldType.Ground && Initative + MoveCost <= MaxInitative)
                     gamemanager.Hover(f, HoverMode.CanMove);
                 else
                     gamemanager.Hover(f, HoverMode.NotMove);
@@ -47,10 +48,38 @@ public abstract class Champion : Unit
         }
         gamemanager.Hover(null, HoverMode.None);
     }
+    public override bool tryMove(Field f)
+    {
+        if (f == field)
+            return true;
+        if (GameManager.Dist(f, field) > MoveDist)
+            return false;
+
+        int x = f.coordinates.Item1 - field.coordinates.Item1;
+        int y = f.coordinates.Item2 - field.coordinates.Item2;
+        if (x != 0)
+        {
+            if (!base.tryMove(gamemanager.getField((field.coordinates.Item1 + (x > 0 ? 1 : -1), field.coordinates.Item2))))
+                if (!base.tryMove(gamemanager.getField((field.coordinates.Item1, field.coordinates.Item2 + (y > 0 ? 1 : -1)))))
+                    return false;
+        }
+        else if (y != 0)
+                if (!base.tryMove(gamemanager.getField((field.coordinates.Item1, field.coordinates.Item2 + (y > 0 ? 1 : -1)))))
+                    return false;
+
+        StartCoroutine(DelayMove(f));
+        return true;
+    }
+    IEnumerator DelayMove(Field f)
+    {
+        yield return new WaitForSeconds(0.2f);
+        tryMove(f);
+    }
     public virtual void setSelectedAction(int id)
     {
         SelectedAction = id;
     }
+    
     public override void LoseHealth(int amount)
     {
         base.LoseHealth(amount);

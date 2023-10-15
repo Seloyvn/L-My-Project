@@ -368,7 +368,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   Initative: 0
-  MaxInitative: 60
+  MaxInitative: 200
   StartDelay: 5
   InitativeIcon: {fileID: 2307021259972699686}
   Ui: {fileID: 3497920479806662152}
@@ -377,8 +377,8 @@ MonoBehaviour:
   Damage: 3
   Armor: 3
   MagicResistance: 3
-  MoveSpeed: 10
-  AttackSpeed: 2
+  MoveSpeed: 7
+  AttackSpeed: 1
 --- !u!114 &6684639159649086628
 MonoBehaviour:
   m_ObjectHideFlags: 0

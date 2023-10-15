@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Linq;
 using UnityEngine.UI;
 using System;
+using System.Collections;
 
 public class GameManager : NetworkBehaviour
 {
@@ -74,28 +75,34 @@ public class GameManager : NetworkBehaviour
         if (!isServer)
             return;
         RpcHidePreGame();
+        team1.player = NetworkServer.connections[0].identity.GetComponent<Player>();
+        team2.player = NetworkServer.connections[NetworkServer.connections.Last().Key].identity.GetComponent<Player>();
         for (int i = 0; i < 10; i++)
         {
             SpawnChampion(SelectedChampions[i],
                 getCloseField(getField((i < 5 ? 4 : 123, i < 5 ? 4 : 123)),
                 getField((i < 5 ? 4 : 123, i < 5 ? 4 : 123)),2).coordinates,
-                NetworkServer.connections[i < 5 ? 0 : NetworkServer.connections.Last().Key].identity.GetComponent<Player>(), i < 5 ? 0 : 1);
+                i < 5 ? 0 : 1);
         }
         SpawnMinions();
 
-        setCurrentTurn(nextunit);
+        StartCoroutine(start());
+    }
+    IEnumerator start()
+    {
+        yield return new WaitForSeconds(1);
+        EndTurn(null);
     }
     [ClientRpc]
     public void RpcHidePreGame()
     {
         PreGame.SetActive(false);
     }
-    Unit nextunit;
     [Server]
-    public void SpawnChampion(int id,(int,int) cord,Player player,int team)
+    public void SpawnChampion(int id,(int,int) cord,int team)
     {
         GameObject g = Instantiate(AllChampionPrefabs[id]);
-        NetworkServer.Spawn(g, player.gameObject);
+        NetworkServer.Spawn(g, (team == 0 ? team1 : team2).player.gameObject);
         Unit unit = g.GetComponent<Unit>();
         unit.Initative = 0;
         unit.SetInitative();
@@ -107,26 +114,30 @@ public class GameManager : NetworkBehaviour
 
         unit.setfield(cord.Item1, cord.Item2);
 
-        nextunit = unit;
     }
     public void SpawnMinions()
     {
-        SpawnMinion(3, 12,0,new (int, int)[3] {(3,12),(7,120),(124,115)});
-        //7 120
+        SpawnMinion(0,new (int, int)[3] {(3,10),(7,119),(117,124)});
+        SpawnMinion(0,new (int, int)[3] { (10, 3),(119,7), (124, 117)});
+        SpawnMinion(0,new (int, int)[4] { (10,10),(55,70), (72, 57),(117,117)});
+        SpawnMinion(1,new (int, int)[3] { (117, 124), (7,119),(3, 10) });
+        SpawnMinion(1,new (int, int)[3] { (124, 117), (119,7), (10, 3)});
+        SpawnMinion(1,new (int, int)[4] { (117, 117),  (72, 57), (55, 70), (10, 10)});
     }
-    void SpawnMinion(int x,int y, int team,(int,int)[] t)
+    void SpawnMinion(int team,(int,int)[] t)
     {
         GameObject g = Instantiate(MinionPrefab);
         NetworkServer.Spawn(g);
-        Minion unit = g.GetComponent<Minion>();
-        unit.Initative = 0;
-        unit.SetInitative();
+        Minion minion = g.GetComponent<Minion>();
+        minion.Initative = 5;
+        minion.SetInitative();
 
-        unit.setTeam(team);
+        minion.setTeam(team);
 
-        unit.setfield(x,y);
+        minion.setfield(t[0].Item1, t[0].Item2);
 
-        nextunit = unit;
+        minion.setPath(t);
+
     }
     public void setCurrentTurn(Entity e)
     {
