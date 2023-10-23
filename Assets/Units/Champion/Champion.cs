@@ -11,6 +11,11 @@ public abstract class Champion : Unit
     [HideInInspector]
     public int SelectedAction = 0;
 
+    [SyncVar]
+    public int Experience;
+
+    public int requiredExperience => Level * 50 + 100;
+
     GameManager gamemanager => GameManager.instance;
     public int MoveDist => (MaxInitative- Initative) / MoveCost;
     public override void Select()
@@ -60,8 +65,9 @@ public abstract class Champion : Unit
         if (x != 0)
         {
             if (!base.tryMove(gamemanager.getField((field.coordinates.Item1 + (x > 0 ? 1 : -1), field.coordinates.Item2))))
-                if (!base.tryMove(gamemanager.getField((field.coordinates.Item1, field.coordinates.Item2 + (y > 0 ? 1 : -1)))))
-                    return false;
+                if (y != 0)
+                    if (!base.tryMove(gamemanager.getField((field.coordinates.Item1, field.coordinates.Item2 + (y > 0 ? 1 : -1)))))
+                        return false;
         }
         else if (y != 0)
                 if (!base.tryMove(gamemanager.getField((field.coordinates.Item1, field.coordinates.Item2 + (y > 0 ? 1 : -1)))))
@@ -72,7 +78,7 @@ public abstract class Champion : Unit
     }
     IEnumerator DelayMove(Field f)
     {
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.02f);
         tryMove(f);
     }
     public virtual void setSelectedAction(int id)
@@ -80,13 +86,20 @@ public abstract class Champion : Unit
         SelectedAction = id;
     }
     
-    public override void LoseHealth(int amount)
+    public override void LoseHealth(Unit attacker,int amount)
     {
-        base.LoseHealth(amount);
+        base.LoseHealth(attacker, amount);
         Healthbar.value =1f* CurrentHealth / MaxHealth;
     }
     [ClientRpc]
     public virtual void SetCooldowns() { }
+    public void getExp(int amount)
+    {
+        Experience += amount;
+
+        while (Experience >= requiredExperience)
+            LevelUp();
+    }
 }
 public enum ChampionEnum:int
 {

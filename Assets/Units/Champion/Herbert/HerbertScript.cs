@@ -117,10 +117,10 @@ public class Herbert : Champion
 
         if (CanCharge)
         {
-                if (Initative <= MaxInitative - 30)
-                {
-                    IncreaseInitative(30);
-                    Exploding = true;
+            if (Initative <= MaxInitative - 30)
+            {
+                IncreaseInitative(30);
+                Exploding = true;
                 foreach (Field f in gamemanager.allFields.Where(f => GameManager.Dist(f, field) <= 4))
                     gamemanager.StartHighlight(f.coordinates.Item1, f.coordinates.Item2);
                 ExplodeCd = 300;
@@ -132,29 +132,30 @@ public class Herbert : Champion
     public void Ability1()
     {
         Exploding = false;
+        int d =(int)( Damage * 1.5f+100+Level*20);
         foreach (Field f in gamemanager.allFields.Where(f => GameManager.Dist(f, field) == 1))
         {
             gamemanager.StopHighlight(f.coordinates.Item1, f.coordinates.Item2);
             if (f.unit != null && f.unit.team != team)
-                DealDamage(f.unit, Damage * 2, DamageType.Physical);
+                DealDamage(f.unit, d, DamageType.Physical);
         }
         foreach (Field f in gamemanager.allFields.Where(f => GameManager.Dist(f, field) == 2))
         {
             gamemanager.StopHighlight(f.coordinates.Item1, f.coordinates.Item2);
             if (f.unit != null && f.unit.team != team)
-                DealDamage(f.unit, Damage * 1.5f, DamageType.Physical);
+                DealDamage(f.unit,d*0.75f, DamageType.Physical);
         }
         foreach (Field f in gamemanager.allFields.Where(f => GameManager.Dist(f, field) == 3))
         {
             gamemanager.StopHighlight(f.coordinates.Item1, f.coordinates.Item2);
             if (f.unit != null && f.unit.team != team)
-                DealDamage(f.unit, Damage, DamageType.Physical);
+                DealDamage(f.unit, Damage*0.5f, DamageType.Physical);
         }
         foreach (Field f in gamemanager.allFields.Where(f => GameManager.Dist(f, field) == 4))
         {
             gamemanager.StopHighlight(f.coordinates.Item1, f.coordinates.Item2);
             if (f.unit != null && f.unit.team != team)
-                DealDamage(f.unit, Damage * 0.5f, DamageType.Physical);
+                DealDamage(f.unit, d * 0.25f, DamageType.Physical);
         }
     }
     public override void IncreaseInitative(int amount)

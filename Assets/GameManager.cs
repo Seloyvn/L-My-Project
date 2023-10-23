@@ -5,15 +5,20 @@ using System.Linq;
 using UnityEngine.UI;
 using System;
 using System.Collections;
+using Random = UnityEngine.Random;
 
 public class GameManager : NetworkBehaviour
 {
+    public bool VisionEnabled;
+    public bool AITurns;
     public static GameManager instance;
     public Field[,] fields;
     public List<Field> allFields = new List<Field>();
+
     public GameObject[] AllChampionPrefabs;
     public GameObject MinionPrefab;
-    [HideInInspector]
+    public GameObject BasePrefab;
+
     public Entity CurrentTurn;
 
     public Team team1 = new Team(0);
@@ -23,6 +28,7 @@ public class GameManager : NetworkBehaviour
     public GameObject InitativeBar;
 
     public GameObject HoverObjectPrefab;
+    public GameObject FogObjectPrefab;
     public GameObject HoverObject;
 
     public Material canMoveMaterial;
@@ -37,7 +43,7 @@ public class GameManager : NetworkBehaviour
     private void Start()
     {
         instance = this;
-        setField();        
+        setField();
     }
     void setField()
     {
@@ -75,18 +81,30 @@ public class GameManager : NetworkBehaviour
         if (!isServer)
             return;
         RpcHidePreGame();
-        team1.player = NetworkServer.connections[0].identity.GetComponent<Player>();
-        team2.player = NetworkServer.connections[NetworkServer.connections.Last().Key].identity.GetComponent<Player>();
-        for (int i = 0; i < 10; i++)
-        {
-            SpawnChampion(SelectedChampions[i],
-                getCloseField(getField((i < 5 ? 4 : 123, i < 5 ? 4 : 123)),
-                getField((i < 5 ? 4 : 123, i < 5 ? 4 : 123)),2).coordinates,
-                i < 5 ? 0 : 1);
-        }
-        SpawnMinions();
+        SetupGame();
 
         StartCoroutine(start());
+    }
+    void SetupGame()
+    {
+        NetworkServer.connections[0].identity.GetComponent<Player>().setTeam(0);
+        NetworkServer.connections[NetworkServer.connections.Last().Key].identity.GetComponent<Player>().setTeam(1);
+
+
+        SpawnBase();
+
+        //for (int i = 0; i < 10; i++)
+        //{
+        //    SpawnChampion(SelectedChampions[i],
+        //        getCloseField(getField((i < 5 ? 4 : 123, i < 5 ? 4 : 123)),
+        //        getField((i < 5 ? 4 : 123, i < 5 ? 4 : 123)), 2).coordinates,
+        //        i < 5 ? 0 : 1);
+        //}
+
+        SpawnMinions();
+
+        foreach (Entity e in AllEntity)
+            e.setVisionFields();
     }
     IEnumerator start()
     {
@@ -99,12 +117,12 @@ public class GameManager : NetworkBehaviour
         PreGame.SetActive(false);
     }
     [Server]
-    public void SpawnChampion(int id,(int,int) cord,int team)
+    void SpawnChampion(int id,(int,int) cord,int team)
     {
         GameObject g = Instantiate(AllChampionPrefabs[id]);
         NetworkServer.Spawn(g, (team == 0 ? team1 : team2).player.gameObject);
         Unit unit = g.GetComponent<Unit>();
-        unit.Initative = 0;
+        unit.Initative = Random.Range(0, 5);
         unit.SetInitative();
 
         unit.setTeam(team);
@@ -115,21 +133,61 @@ public class GameManager : NetworkBehaviour
         unit.setfield(cord.Item1, cord.Item2);
 
     }
+    void SpawnBase()
+    {
+        Base b = Instantiate(BasePrefab).GetComponent<Base>();
+        NetworkServer.Spawn(b.gameObject);
+        b.team = team1;
+        b.field = fields[0, 0];
+
+
+        b = Instantiate(BasePrefab).GetComponent<Base>();
+        NetworkServer.Spawn(b.gameObject);
+        b.team = team2;
+        b.field = fields[127, 127];
+    }
     public void SpawnMinions()
     {
-        SpawnMinion(0,new (int, int)[3] {(3,10),(7,119),(117,124)});
-        SpawnMinion(0,new (int, int)[3] { (10, 3),(119,7), (124, 117)});
-        SpawnMinion(0,new (int, int)[4] { (10,10),(55,70), (72, 57),(117,117)});
-        SpawnMinion(1,new (int, int)[3] { (117, 124), (7,119),(3, 10) });
-        SpawnMinion(1,new (int, int)[3] { (124, 117), (119,7), (10, 3)});
-        SpawnMinion(1,new (int, int)[4] { (117, 117),  (72, 57), (55, 70), (10, 10)});
+        int t = 0;
+        int c = 0;
+        foreach(Unit u in AllEntity)
+        {
+            if(u is Champion)
+            {
+                t += u.Level;
+                c++;
+            }
+        }
+        if (c == 0)
+            t = 1;
+        else
+            t = t / c;
+        SpawnMinion(0,new (int, int)[3] {(3,10),(7,119),(117,124)},t);
+        SpawnMinion(0,new (int, int)[3] {(3,9),(7,119),(117,124)},t);
+        SpawnMinion(0,new (int, int)[3] {(3,8),(7,119),(117,124)},t);
+        SpawnMinion(0,new (int, int)[3] { (10, 3),(119,7), (124, 117)},t);
+        SpawnMinion(0,new (int, int)[3] { (9, 3),(119,7), (124, 117)},t);
+        SpawnMinion(0,new (int, int)[3] { (8, 3),(119,7), (124, 117)},t);
+        SpawnMinion(0,new (int, int)[4] { (10,10),(55,70), (72, 57),(117,117)},t);
+        SpawnMinion(0,new (int, int)[4] { (9,10),(55,70), (72, 57),(117,117)},t);
+        SpawnMinion(0,new (int, int)[4] { (10,9),(55,70), (72, 57),(117,117)},t);
+        SpawnMinion(1,new (int, int)[3] { (117, 124), (7,119),(3, 10) },t);
+        SpawnMinion(1,new (int, int)[3] { (118, 124), (7,119),(3, 10) },t);
+        SpawnMinion(1,new (int, int)[3] { (119, 124), (7,119),(3, 10) },t);
+        SpawnMinion(1,new (int, int)[3] { (124, 117), (119,7), (10, 3)},t);
+        SpawnMinion(1,new (int, int)[3] { (124, 118), (119,7), (10, 3)},t);
+        SpawnMinion(1,new (int, int)[3] { (124, 119), (119,7), (10, 3)},t);
+        SpawnMinion(1,new (int, int)[4] { (117, 117),  (72, 57), (55, 70), (10, 10)},t);
+        SpawnMinion(1,new (int, int)[4] { (118, 117),  (72, 57), (55, 70), (10, 10)},t);
+        SpawnMinion(1,new (int, int)[4] { (117, 118),  (72, 57), (55, 70), (10, 10)},t);
     }
-    void SpawnMinion(int team,(int,int)[] t)
+    void SpawnMinion(int team,(int,int)[] t,int l)
     {
         GameObject g = Instantiate(MinionPrefab);
         NetworkServer.Spawn(g);
         Minion minion = g.GetComponent<Minion>();
-        minion.Initative = 5;
+        minion.SetLevel(l);
+        minion.Initative = Random.Range(0,5);
         minion.SetInitative();
 
         minion.setTeam(team);
@@ -143,12 +201,15 @@ public class GameManager : NetworkBehaviour
     {
         e.IncreaseInitative(e.StartDelay);
         e.SetInitative();
+        CurrentTurn = e;
         RpcsetCurrentTurn(e.netId);
         e.GetTurn();
     }
     [ClientRpc]
     public void RpcsetCurrentTurn(uint id)
     {
+        if (isServer)
+            return;
         CurrentTurn = AllEntity.Where(u => u.netId == id).FirstOrDefault();
     }
     public void SetInitativeBar(GameObject o,int i)
@@ -162,18 +223,17 @@ public class GameManager : NetworkBehaviour
         CurrentInitativeSlider.maxValue = m;
         CurrentInitativeSlider.value = c;
     }
-    public void EndTurn(Unit u)
+    public void EndTurn(Entity u)
     {
         if (CurrentTurn != u)
             return;
-        
+
         Entity nextentity = AllEntity.OrderBy(u => u.Initative).First();
         int i = nextentity.Initative;
-        foreach (Unit unit in AllEntity)        
-            unit.DecreaseInitative(i);
+        foreach (Entity e in AllEntity)        
+            e.DecreaseInitative(i);
 
         setCurrentTurn(nextentity);
-
     }
     public void Hover(Field f,HoverMode mode)
     {
@@ -242,9 +302,40 @@ public class GameManager : NetworkBehaviour
         return null;
 
     }
+    public void UpdateVision()
+    {
+        foreach (Entity e in AllEntity)
+            e.UpdateVision();
+    }
     public static int Dist(Field f1,Field f2)
     {
         return Mathf.Abs(f1.coordinates.Item1 - f2.coordinates.Item1) + Mathf.Abs(f1.coordinates.Item2 - f2.coordinates.Item2);
+    }
+    public static float SDist(Field f1,Field f2)
+    {
+        return Mathf.Pow(Mathf.Abs(f1.coordinates.Item1 - f2.coordinates.Item1),2) + Mathf.Pow(Mathf.Abs(f1.coordinates.Item2 - f2.coordinates.Item2),2);
+    }
+    public List<Field> BetweenFields(Field f1, Field f2)
+    {
+        int x1 = Mathf.Min(f1.coordinates.Item1, f2.coordinates.Item1);
+        int x2 = Mathf.Max(f1.coordinates.Item1, f2.coordinates.Item1);
+        int y1 = Mathf.Min(f1.coordinates.Item2, f2.coordinates.Item2);
+        int y2 = Mathf.Max(f1.coordinates.Item2, f2.coordinates.Item2);
+        List<Field> fields = new List<Field>();
+        IEnumerable<Field> ef= allFields.Where(f => f.coordinates.Item1 >= x1 && f.coordinates.Item1 <= x2 && f.coordinates.Item2 >= y1 && f.coordinates.Item2 <= y2);
+
+        foreach (Field f in ef)
+        {
+            float e1 = f.coordinates.Item2 - ((((float)f2.coordinates.Item2 - f1.coordinates.Item2) / (f2.coordinates.Item1 - f1.coordinates.Item1)) * (f.coordinates.Item1 - f1.coordinates.Item1-0.5f) + f1.coordinates.Item2 + 0.5f);
+            float e2 = f.coordinates.Item2 - ((((float)f2.coordinates.Item2 - f1.coordinates.Item2) / (f2.coordinates.Item1 - f1.coordinates.Item1)) * (f.coordinates.Item1+1 - f1.coordinates.Item1 - 0.5f) + f1.coordinates.Item2 + 0.5f);
+            float e3 = f.coordinates.Item2+1 - ((((float)f2.coordinates.Item2 - f1.coordinates.Item2) / (f2.coordinates.Item1 - f1.coordinates.Item1)) * (f.coordinates.Item1 - f1.coordinates.Item1 - 0.5f) + f1.coordinates.Item2 + 0.5f);
+            float e4 = f.coordinates.Item2+1 - ((((float)f2.coordinates.Item2 - f1.coordinates.Item2) / (f2.coordinates.Item1 - f1.coordinates.Item1)) * (f.coordinates.Item1+1 - f1.coordinates.Item1 - 0.5f) + f1.coordinates.Item2 + 0.5f);
+
+            if (!((e1 < 0 && e2 < 0 && e3 < 0 && e4 < 0) || (e1 > 0 && e2 > 0 && e3 > 0 && e4 > 0)))
+                fields.Add(f);            
+        }
+        return fields;
+
     }
     public static (int,int) getfieldcords(Vector3 position)
     {

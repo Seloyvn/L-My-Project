@@ -28,15 +28,15 @@ RectTransform:
   m_GameObject: {fileID: 2307021259972699686}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.99658996, y: 0.99658996, z: 0.99658996}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 9187181187597294806}
+  m_Father: {fileID: 9199702640145118010}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 263}
+  m_AnchoredPosition: {x: 0, y: -14}
   m_SizeDelta: {x: 5, y: 5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6782182482053605819
@@ -347,7 +347,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4696756794084525102}
-  - {fileID: 4637537722387827639}
   - {fileID: 9199702640145118010}
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -368,16 +367,22 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   Initative: 0
-  MaxInitative: 200
+  MaxInitative: 60
   StartDelay: 5
   InitativeIcon: {fileID: 2307021259972699686}
   Ui: {fileID: 3497920479806662152}
-  MaxHealth: 5
+  Model: {fileID: 4151667086158234155}
+  Level: 1
+  MaxHealth: 150
+  HealthPerLevel: 20
   CurrentHealth: 0
-  Damage: 3
-  Armor: 3
-  MagicResistance: 3
-  MoveSpeed: 7
+  Damage: 10
+  DamagePerLevel: 1
+  Armor: 20
+  ArmorPerLevel: 0
+  MagicResistance: 20
+  MagicResistancePerLevel: 0
+  MoveSpeed: 10
   AttackSpeed: 1
 --- !u!114 &6684639159649086628
 MonoBehaviour:
@@ -428,6 +433,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4514542089307903}
+  - {fileID: 4637537722387827639}
   m_Father: {fileID: 9187181187597294806}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

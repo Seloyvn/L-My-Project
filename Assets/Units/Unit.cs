@@ -1,5 +1,8 @@
 using Mirror;
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,24 +10,29 @@ public abstract class Unit : Entity
 {
     public static Unit selectedunit;
     public GameObject Ui;
-
-    public Team team;
+    public GameObject Model;
 
     #region stats
     [SyncVar]
+    public int Level;
+    [SyncVar]
     public int MaxHealth;
+    public int HealthPerLevel;
     [SyncVar]
     [HideInInspector]
     public int CurrentHealth;
 
     [SyncVar]
     public int Damage;
+    public int DamagePerLevel;
 
     [SyncVar]
     public int Armor;
+    public int ArmorPerLevel;
 
     [SyncVar]
     public int MagicResistance;
+    public int MagicResistancePerLevel;
 
     [SyncVar]
     public float MoveSpeed;
@@ -35,10 +43,7 @@ public abstract class Unit : Entity
     #endregion
 
     GameManager gamemanager => GameManager.instance;
-    private void Start()
-    {
-        gamemanager.AllEntity.Add(this);
-    }
+    
     [ClientRpc]
     public void setTeam(int i)
     {
@@ -99,6 +104,7 @@ public abstract class Unit : Entity
                 IncreaseInitative(MoveCost);
                 gamemanager.ShowCurrentInitative(Initative, MaxInitative);
                 SetInitative();
+                setVisionFields();
                 return true;
             }
         }
@@ -131,7 +137,8 @@ public abstract class Unit : Entity
     public override void RpcGetTurn()
     {
         InitativeIcon.GetComponent<Image>().color = Color.green;
-        Select();
+        if(hasVision)
+            Select();
     }
     public virtual void Attack(Unit u)
     {
@@ -149,37 +156,62 @@ public abstract class Unit : Entity
                 m = getDmgMult(u.MagicResistance);
                 break;
         }
-        u.LoseHealth((int)(amount * m));
+        u.LoseHealth(this,(int)(amount * m));
     }
-    public virtual void LoseHealth(int amount)
+    public virtual void LoseHealth(Unit attacker,int amount)
     {
         CurrentHealth -= amount;
+        if (CurrentHealth <= 0)
+            Die(attacker);
     }
-    public virtual void tryEndTurn()
+    public virtual void Die(Unit attacker)
     {
-        CmdEndTurn();
-    }
-    [Command]
-    public virtual void CmdEndTurn()
-    {
-        EndTurn();
-    }
-    [Server]
-    public virtual void EndTurn()
-    {
-        gamemanager.EndTurn(this);
-        RpcEndTurn();
+        throw new System.NotImplementedException();
     }
     [ClientRpc]
-    public virtual void RpcEndTurn()
+    public virtual void RPCDie()
+    {
+        gamemanager.AllEntity.Remove(this);
+        field.unit = null;
+        Destroy(gameObject);
+    }
+    public virtual void LevelUp()
+    {
+        Level++;
+        Damage += DamagePerLevel;
+        MaxHealth += HealthPerLevel;
+        CurrentHealth += HealthPerLevel;
+        Armor += ArmorPerLevel;
+        MagicResistance += MagicResistancePerLevel;
+    }
+    [ClientRpc]
+    public override void RpcEndTurn()
     {
         InitativeIcon.GetComponent<Image>().color = team.color;
     }
     public virtual void Click(Field field) { }
     public static float getDmgMult(int r)
     {
-        return 10 / (10f + r);
+        return 100 / (100f + r);
     }
+    [ClientRpc]
+    public override void UpdateVision()
+    {
+        Model.SetActive(hasVision);
+        InitativeIcon.SetActive(hasVision);
+    }
+    public List<Champion> GetExpChampions(Unit attacker)
+    {
+        List<Champion> champions = new List<Champion>();
+
+        foreach (Field f in gamemanager.allFields.Where(f => f.unit is Champion&& f.unit.team != team && GameManager.Dist(field,f)<=8))
+            champions.Add(f.unit as Champion);
+
+        if (!champions.Contains(attacker) && attacker is Champion)
+            champions.Add(attacker as Champion);
+
+        return champions;
+    } 
 }
 public enum DamageType
 {

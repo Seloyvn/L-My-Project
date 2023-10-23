@@ -48,7 +48,7 @@ public class MapBuilder : MonoBehaviour
     }
     public void Load()
     {
-        Map=Load(Application.persistentDataPath + "/map.map");
+        Map = Load(Application.persistentDataPath + "/map.map");
         terrain.terrainData.size = new Vector3(size, 3, size);
         SetFieldHeight();
     }
@@ -60,6 +60,7 @@ public class MapBuilder : MonoBehaviour
             FileStream stream = new FileStream(path, FileMode.Open);
 
             MapSerializable map = formatter.Deserialize(stream) as MapSerializable;
+            stream.Close();
 
             return map;
         }

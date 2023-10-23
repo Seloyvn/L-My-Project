@@ -2508,14 +2508,17 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+  VisionEnabled: 0
+  AITurns: 1
   AllChampionPrefabs:
   - {fileID: 4575443708498460583, guid: 94bf313086d77c64fb6b31a10df06a51, type: 3}
-  - {fileID: 4575443708498460583, guid: 83c9388c37517c1499a66b1c68299784, type: 3}
   MinionPrefab: {fileID: 5285689404707691624, guid: 9bf91af27d58a3a44abf033d0a347c6d, type: 3}
+  BasePrefab: {fileID: 2934253981235704532, guid: 35cd412e1d56c764ca7c2ef9df2c9e3b, type: 3}
   CurrentTurn: {fileID: 0}
   CurrentInitativeSlider: {fileID: 1102303528}
   InitativeBar: {fileID: 1695382602}
   HoverObjectPrefab: {fileID: 8335832065591937012, guid: c90853729079c0a458e68c9a4633ab1e, type: 3}
+  FogObjectPrefab: {fileID: 5304998735313539305, guid: 339054b43190d0e44acc4cae36e55b99, type: 3}
   HoverObject: {fileID: 199009344}
   canMoveMaterial: {fileID: 2100000, guid: 66f7ff37e8d64c14eb79b17ca26935cc, type: 2}
   notMoveMaterial: {fileID: 2100000, guid: fbe1d41dcb9021f4c92c7f17c952da92, type: 2}

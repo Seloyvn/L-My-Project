@@ -364,6 +364,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   setheight: 2
   terrain: {fileID: 236818269}
+  MapScriptable: {fileID: 11400000, guid: 2cdef637c9ebf724bbce7122ee5b5fd8, type: 2}
 --- !u!1 &645476091
 GameObject:
   m_ObjectHideFlags: 0
