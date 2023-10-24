@@ -2,8 +2,11 @@ using Mirror;
 using System.Linq;
 using TMPro;
 using UnityEngine.UI;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
-public class Herbert : Champion
+public class HerbertScript : Champion
 {
     GameManager gamemanager => GameManager.instance;
 

@@ -16,6 +16,7 @@ public class MapBuilder : MonoBehaviour
     {
         Debug.Log(Application.persistentDataPath + "/map.map");
         Load();
+        //Map = new MapSerializable(128);
     }
     void Update()
     {

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public abstract class Champion : Unit
+public class Champion : Unit
 {
     public GameObject ControllUi;
     public Slider Healthbar;
