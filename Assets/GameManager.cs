@@ -15,10 +15,14 @@ public class GameManager : NetworkBehaviour
     public Field[,] fields;
     public List<Field> allFields = new List<Field>();
 
+    public int TimeTotal;
+
     public GameObject[] AllChampionPrefabs;
     public GameObject MinionPrefab;
     public GameObject BasePrefab;
+    public GameObject MinionSpawnPrefab;
 
+    [HideInInspector]
     public Entity CurrentTurn;
 
     public Team team1 = new Team(0);
@@ -93,15 +97,16 @@ public class GameManager : NetworkBehaviour
 
         SpawnBase();
 
-        //for (int i = 0; i < 10; i++)
-        //{
-        //    SpawnChampion(SelectedChampions[i],
-        //        getCloseField(getField((i < 5 ? 4 : 123, i < 5 ? 4 : 123)),
-        //        getField((i < 5 ? 4 : 123, i < 5 ? 4 : 123)), 2).coordinates,
-        //        i < 5 ? 0 : 1);
-        //}
+        for (int i = 0; i < 10; i++)
+        {
+            SpawnChampion(SelectedChampions[i],
+                getCloseField(getField((i < 5 ? 4 : 123, i < 5 ? 4 : 123)),
+                getField((i < 5 ? 4 : 123, i < 5 ? 4 : 123)), 2).coordinates,
+                i < 5 ? 0 : 1);
+        }
 
-        SpawnMinions();
+
+        NetworkServer.Spawn(Instantiate(MinionSpawnPrefab), NetworkServer.connections[0]);
 
         foreach (Entity e in AllEntity)
             e.setVisionFields();
@@ -148,38 +153,26 @@ public class GameManager : NetworkBehaviour
     }
     public void SpawnMinions()
     {
-        int t = 0;
-        int c = 0;
-        foreach(Unit u in AllEntity)
-        {
-            if(u is Champion)
-            {
-                t += u.Level;
-                c++;
-            }
-        }
-        if (c == 0)
-            t = 1;
-        else
-            t = t / c;
-        SpawnMinion(0,new (int, int)[3] {(3,10),(7,119),(117,124)},t);
-        SpawnMinion(0,new (int, int)[3] {(3,9),(7,119),(117,124)},t);
-        SpawnMinion(0,new (int, int)[3] {(3,8),(7,119),(117,124)},t);
-        SpawnMinion(0,new (int, int)[3] { (10, 3),(119,7), (124, 117)},t);
-        SpawnMinion(0,new (int, int)[3] { (9, 3),(119,7), (124, 117)},t);
-        SpawnMinion(0,new (int, int)[3] { (8, 3),(119,7), (124, 117)},t);
-        SpawnMinion(0,new (int, int)[4] { (10,10),(55,70), (72, 57),(117,117)},t);
-        SpawnMinion(0,new (int, int)[4] { (9,10),(55,70), (72, 57),(117,117)},t);
-        SpawnMinion(0,new (int, int)[4] { (10,9),(55,70), (72, 57),(117,117)},t);
-        SpawnMinion(1,new (int, int)[3] { (117, 124), (7,119),(3, 10) },t);
-        SpawnMinion(1,new (int, int)[3] { (118, 124), (7,119),(3, 10) },t);
-        SpawnMinion(1,new (int, int)[3] { (119, 124), (7,119),(3, 10) },t);
-        SpawnMinion(1,new (int, int)[3] { (124, 117), (119,7), (10, 3)},t);
-        SpawnMinion(1,new (int, int)[3] { (124, 118), (119,7), (10, 3)},t);
-        SpawnMinion(1,new (int, int)[3] { (124, 119), (119,7), (10, 3)},t);
-        SpawnMinion(1,new (int, int)[4] { (117, 117),  (72, 57), (55, 70), (10, 10)},t);
-        SpawnMinion(1,new (int, int)[4] { (118, 117),  (72, 57), (55, 70), (10, 10)},t);
-        SpawnMinion(1,new (int, int)[4] { (117, 118),  (72, 57), (55, 70), (10, 10)},t);
+        int c = avgChampLvl();
+        
+        SpawnMinion(0,new (int, int)[3] {(3,10),(7,119),(117,124)},c);
+        SpawnMinion(0,new (int, int)[3] {(3,9),(7,119),(117,124)},c);
+        SpawnMinion(0,new (int, int)[3] {(3,8),(7,119),(117,124)},c);
+        SpawnMinion(0,new (int, int)[3] { (10, 3),(119,7), (124, 117)},c);
+        SpawnMinion(0,new (int, int)[3] { (9, 3),(119,7), (124, 117)},c);
+        SpawnMinion(0,new (int, int)[3] { (8, 3),(119,7), (124, 117)},c);
+        SpawnMinion(0,new (int, int)[4] { (10,10),(55,70), (72, 57),(117,117)},c);
+        SpawnMinion(0,new (int, int)[4] { (9,10),(55,70), (72, 57),(117,117)},c);
+        SpawnMinion(0,new (int, int)[4] { (10,9),(55,70), (72, 57),(117,117)},c);
+        SpawnMinion(1,new (int, int)[3] { (117, 124), (7,119),(3, 10) },c);
+        SpawnMinion(1,new (int, int)[3] { (118, 124), (7,119),(3, 10) },c);
+        SpawnMinion(1,new (int, int)[3] { (119, 124), (7,119),(3, 10) },c);
+        SpawnMinion(1,new (int, int)[3] { (124, 117), (119,7), (10, 3)},c);
+        SpawnMinion(1,new (int, int)[3] { (124, 118), (119,7), (10, 3)},c);
+        SpawnMinion(1,new (int, int)[3] { (124, 119), (119,7), (10, 3)},c);
+        SpawnMinion(1,new (int, int)[4] { (117, 117),  (72, 57), (55, 70), (10, 10)},c);
+        SpawnMinion(1,new (int, int)[4] { (118, 117),  (72, 57), (55, 70), (10, 10)},c);
+        SpawnMinion(1,new (int, int)[4] { (117, 118),  (72, 57), (55, 70), (10, 10)},c);
     }
     void SpawnMinion(int team,(int,int)[] t,int l)
     {
@@ -227,9 +220,9 @@ public class GameManager : NetworkBehaviour
     {
         if (CurrentTurn != u)
             return;
-
         Entity nextentity = AllEntity.OrderBy(u => u.Initative).First();
         int i = nextentity.Initative;
+        TimeTotal += i;
         foreach (Entity e in AllEntity)        
             e.DecreaseInitative(i);
 
@@ -336,6 +329,22 @@ public class GameManager : NetworkBehaviour
         }
         return fields;
 
+    }
+    int avgChampLvl() {
+        int c = 0;
+        int t = 0;
+        foreach (Entity u in AllEntity)
+        {
+            if (u is Champion ch)
+            {
+                t += ch.Level;
+                c++;
+            }
+        }
+        if (c == 0)
+            return 1;
+        else
+            return t / c;
     }
     public static (int,int) getfieldcords(Vector3 position)
     {
