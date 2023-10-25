@@ -2248,8 +2248,10 @@ MonoBehaviour:
   MinionPrefab: {fileID: 5285689404707691624, guid: 2018c3afd3fd8214bbefd4288301830b, type: 3}
   BasePrefab: {fileID: 2934253981235704532, guid: 064389d05b555fc41b9e8d6426cba537, type: 3}
   MinionSpawnPrefab: {fileID: 580970703626458224, guid: 8158eec381dadaa469df7c240824874f, type: 3}
+  Camp1Prefab: {fileID: 2247631730347487793, guid: 32f69664885713348bea128a6f0a6b6e, type: 3}
+  Camp2Prefab: {fileID: 2247631730347487793, guid: 8a0a75b9f436eb9479126c5f977e619b, type: 3}
   CurrentTurn: {fileID: 0}
-  CurrentInitativeSlider: {fileID: 915805407}
+  CurrentInitativeSlider: {fileID: 1102303528}
   InitativeBar: {fileID: 1695382602}
   HoverObjectPrefab: {fileID: 8335832065591937012, guid: cd3a9e8af51e62343b8483828336efa6, type: 3}
   FogObjectPrefab: {fileID: 5304998735313539305, guid: 52b5cf03d97230b40bf3ad5ecacc842e, type: 3}

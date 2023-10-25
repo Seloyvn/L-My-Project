@@ -98,7 +98,7 @@ public class HerbertScript : Champion
                 if (Initative <= MaxInitative - 50)
                 {
                     IncreaseInitative(50);
-                    ChargeCd = 60;
+                    ChargeCd = 500;
                     SetCooldowns();
                     setfield(df.coordinates.Item1, df.coordinates.Item2);
                     DealDamage(f.unit,Damage+1,DamageType.Physical);
@@ -118,7 +118,7 @@ public class HerbertScript : Champion
         if (gamemanager.CurrentTurn != this)
             return;
 
-        if (CanCharge)
+        if (CanExplode)
         {
             if (Initative <= MaxInitative - 30)
             {

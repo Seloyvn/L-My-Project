@@ -10,7 +10,7 @@ public abstract class Entity : NetworkBehaviour
     public Field field;
 
     public Team team;
-    [HideInInspector]
+    //[HideInInspector]
     [SyncVar]
     public int Initative;
     public int MaxInitative;
@@ -21,7 +21,7 @@ public abstract class Entity : NetworkBehaviour
     {
          get
         {
-            return team.player.isLocalPlayer||field.hasVision||!gamemanager.VisionEnabled;
+            return team?.player.isLocalPlayer??false||field.hasVision||!gamemanager.VisionEnabled;
         }
     }
     GameManager gamemanager => GameManager.instance; 
@@ -57,7 +57,7 @@ public abstract class Entity : NetworkBehaviour
         !gamemanager.BetweenFields(field,f).Where(bf=>bf.fieldType!=FieldType.Ground).Any()));
 
 
-        team.setVision();
+        team?.setVision();
     }
     public virtual IEnumerable<Field> getVisionFields()
     {

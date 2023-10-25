@@ -4,16 +4,17 @@ using UnityEngine;
 
 public class MinionSpawn : Entity
 {
-    GameManager gameManager => GameManager.instance;
+    GameManager gamemanager => GameManager.instance;
 
     private void Start()
     {
+        gamemanager.AllEntity.Add(this);
         IncreaseInitative(MaxInitative);
     }
     public override void GetTurn()
     {
         base.GetTurn();
-        gameManager.SpawnMinions();
+        gamemanager.SpawnMinions();
         IncreaseInitative(MaxInitative);
         EndTurn();
     }

@@ -21,6 +21,9 @@ public class GameManager : NetworkBehaviour
     public GameObject MinionPrefab;
     public GameObject BasePrefab;
     public GameObject MinionSpawnPrefab;
+    public GameObject Camp1Prefab;
+    public GameObject Camp2Prefab;
+
 
     [HideInInspector]
     public Entity CurrentTurn;
@@ -96,13 +99,15 @@ public class GameManager : NetworkBehaviour
 
 
         SpawnBase();
+        SpawnCamps();
 
         for (int i = 0; i < 10; i++)
         {
-            SpawnChampion(SelectedChampions[i],
-                getCloseField(getField((i < 5 ? 4 : 123, i < 5 ? 4 : 123)),
-                getField((i < 5 ? 4 : 123, i < 5 ? 4 : 123)), 2).coordinates,
-                i < 5 ? 0 : 1);
+            if (i < 2)
+                SpawnChampion(SelectedChampions[i],
+                    getCloseField(getField((i < 5 ? 4 : 123, i < 5 ? 4 : 123)),
+                    getField((i < 5 ? 4 : 123, i < 5 ? 4 : 123)), 2).coordinates,
+                    i < 5 ? 0 : 1);
         }
 
 
@@ -150,6 +155,23 @@ public class GameManager : NetworkBehaviour
         NetworkServer.Spawn(b.gameObject);
         b.team = team2;
         b.field = fields[127, 127];
+    }
+    public void SpawnCamps()
+    {
+        Camp c = Instantiate(Camp1Prefab).GetComponent<Camp>();
+        NetworkServer.Spawn(c.gameObject);
+        c.team = team1;
+        c.field = fields[45,20];
+
+        c = Instantiate(Camp1Prefab).GetComponent<Camp>();
+        NetworkServer.Spawn(c.gameObject);
+        c.team = team1;
+        c.field = fields[83,108];
+
+        c = Instantiate(Camp2Prefab).GetComponent<Camp>();
+        NetworkServer.Spawn(c.gameObject);
+        c.team = team1;
+        c.field = fields[58,55];
     }
     public void SpawnMinions()
     {
@@ -330,7 +352,7 @@ public class GameManager : NetworkBehaviour
         return fields;
 
     }
-    int avgChampLvl() {
+    public int avgChampLvl() {
         int c = 0;
         int t = 0;
         foreach (Entity u in AllEntity)

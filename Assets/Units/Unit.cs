@@ -11,6 +11,7 @@ public abstract class Unit : Entity
     public static Unit selectedunit;
     public GameObject Ui;
     public GameObject Model;
+    public Slider Healthbar;
 
     #region stats
     [SyncVar]
@@ -19,7 +20,6 @@ public abstract class Unit : Entity
     public int MaxHealth;
     public int HealthPerLevel;
     [SyncVar]
-    [HideInInspector]
     public int CurrentHealth;
 
     [SyncVar]
@@ -36,14 +36,18 @@ public abstract class Unit : Entity
 
     [SyncVar]
     public float MoveSpeed;
-    public int MoveCost => (int)(50 / MoveSpeed)+1;
+    public int MoveCost => Mathf.CeilToInt(100 / MoveSpeed);
     [SyncVar]
     public float AttackSpeed;
-    public int AttackCost => (int)(50 / AttackSpeed) + 1;
+    public int AttackCost => Mathf.CeilToInt(100 / AttackSpeed);
     #endregion
 
     GameManager gamemanager => GameManager.instance;
-    
+
+    private void Start()
+    {
+        gamemanager.AllEntity.Add(this);
+    }
     [ClientRpc]
     public void setTeam(int i)
     {
@@ -161,6 +165,7 @@ public abstract class Unit : Entity
     public virtual void LoseHealth(Unit attacker,int amount)
     {
         CurrentHealth -= amount;
+        Healthbar.value = 1f * CurrentHealth / MaxHealth;
         if (CurrentHealth <= 0)
             Die(attacker);
     }
@@ -187,7 +192,7 @@ public abstract class Unit : Entity
     [ClientRpc]
     public override void RpcEndTurn()
     {
-        InitativeIcon.GetComponent<Image>().color = team.color;
+        InitativeIcon.GetComponent<Image>().color = team?.color??Color.white;
     }
     public virtual void Click(Field field) { }
     public static float getDmgMult(int r)

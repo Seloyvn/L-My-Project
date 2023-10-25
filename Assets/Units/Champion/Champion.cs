@@ -7,7 +7,6 @@ using UnityEngine.UI;
 public class Champion : Unit
 {
     public GameObject ControllUi;
-    public Slider Healthbar;
     [HideInInspector]
     public int SelectedAction = 0;
 
@@ -86,11 +85,6 @@ public class Champion : Unit
         SelectedAction = id;
     }
     
-    public override void LoseHealth(Unit attacker,int amount)
-    {
-        base.LoseHealth(attacker, amount);
-        Healthbar.value =1f* CurrentHealth / MaxHealth;
-    }
     [ClientRpc]
     public virtual void SetCooldowns() { }
     public void getExp(int amount)

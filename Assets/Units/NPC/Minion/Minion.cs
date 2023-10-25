@@ -7,7 +7,6 @@ public class Minion : Unit
 {
     (int, int)[] paths;
     int path = 0;
-    GameManager gameManager => GameManager.instance;
     (int, int) dest {
         get
         {
@@ -34,7 +33,7 @@ public class Minion : Unit
     }
     IEnumerator DoTurn()
     {
-        if(gameManager.AITurns)
+        if(gamemanager.AITurns)
             yield return new WaitForSeconds(0.01f);
 
         if (GameManager.Dist(field, gamemanager.fields[paths[path].Item1, paths[path].Item2]) <= 2 && path < paths.Length - 1)
